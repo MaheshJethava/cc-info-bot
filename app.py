@@ -73,18 +73,17 @@ class Bot(commands.Bot):
             flask_thread.start()
             print("🚀 Flask server started in background")
 
-    @tasks.loop(minutes=5)
-    async def update_status(self):
-        """Update bot presence periodically"""
-        try:
-            activity = discord.Activity(
-                type=discord.ActivityType.Watching,
-                status=discord.Status.dnd,
-                name=f"{len(self.guilds)} Servers !!"
-            )
-            await self.change_presence(activity=activity)
-        except Exception as e:
-            print(f"⚠️ Status update failed: {e}")
+@tasks.loop(minutes=5)
+async def update_status(self):
+    """Update bot presence periodically"""
+    try:
+        activity = discord.Activity(
+            type=discord.ActivityType.Watching,
+            name=f"{len(self.guilds)} Servers !!"
+        )
+        await self.change_presence(activity=activity, status=discord.Status.dnd)
+    except Exception as e:
+        print(f"⚠️ Status update failed: {e}")
 
     @update_status.before_loop
     async def before_status_update(self):
