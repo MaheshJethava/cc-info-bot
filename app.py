@@ -52,24 +52,28 @@ class Bot(commands.Bot):
         await self.tree.sync()
         self.update_status.start()
 
-    async def _update_status(self):
-        try:
-            activity = discord.Activity(type=discord.ActivityType.playing, name="Clutch Info 📑")
-            await self.change_presence(activity=activity, status=discord.Status.dnd)
-        except Exception as e:
-            print(f"⚠️ Failed to update status: {e}")
+async def _update_status(self):
+    try:
+        activity = discord.Game("Clutch Info 📑")
+        await self.change_presence(activity=activity)  # 👈 don't include status here
+    except Exception as e:
+        print(f"⚠️ Failed to update status: {e}")
 
-    async def on_ready(self):
-        global bot_name
-        bot_name = str(self.user)
-        print(f"\n🔗 Logged in as {bot_name}")
-        print(f"🌐 Serving {len(self.guilds)} servers")
+async def on_ready(self):
+    global bot_name
+    bot_name = str(self.user)
+    print(f"\n🔗 Logged in as {bot_name}")
+    print(f"🌐 Serving {len(self.guilds)} servers")
 
-        # Only start Flask on Render or Replit
-        if os.environ.get("RENDER") or os.environ.get("REPL_ID"):
-            import threading
-            threading.Thread(target=run_flask, daemon=True).start()
-            print("🚀 Flask server started")
+    # Explicitly set DND status again after ready
+    activity = discord.Game("Clutch Info 📑")
+    await self.change_presence(status=discord.Status.dnd, activity=activity)
+
+    # Start Flask server if on Render
+    if os.environ.get("RENDER") or os.environ.get("REPL_ID"):
+        import threading
+        threading.Thread(target=run_flask, daemon=True).start()
+        print("🚀 Flask server started")
 
     async def close(self):
         if self.session:
