@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 # Load .env variables
 load_dotenv()
 
-# Flask app setup
+# Flask app setup for uptime pings
 app = Flask(__name__)
 bot_name = "Loading..."
 
@@ -20,16 +20,15 @@ def home():
     return f"✅ Bot {bot_name} is operational"
 
 def run_flask():
-    """Runs the Flask server (used for uptime on Render)"""
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
 
-# Get token from environment
+# Get bot token from environment
 TOKEN = os.getenv("TOKEN")
 if not TOKEN:
-    raise ValueError("Missing TOKEN in environment")
+    raise ValueError("❌ Missing TOKEN in environment")
 
-# Discord Bot class
+# Define custom bot class
 class Bot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
@@ -42,7 +41,7 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
 
-        # Load cog
+        # Load extension
         try:
             await self.load_extension("cogs.infoCommands")
             print("✅ Successfully loaded InfoCommands cog")
@@ -50,16 +49,15 @@ class Bot(commands.Bot):
             print(f"❌ Failed to load cog: {e}")
             traceback.print_exc()
 
-        # Sync commands and start status loop
         await self.tree.sync()
         self.update_status.start()
 
     async def _update_status(self):
         try:
-            activity = discord.Game(name="Clutch Info 📑")  # Automatically shows "Playing"
+            activity = discord.Activity(type=discord.ActivityType.playing, name="Clutch Info 📑")
             await self.change_presence(activity=activity, status=discord.Status.dnd)
         except Exception as e:
-            print(f"⚠️ Status update failed: {e}")
+            print(f"⚠️ Failed to update status: {e}")
 
     async def on_ready(self):
         global bot_name
@@ -67,11 +65,10 @@ class Bot(commands.Bot):
         print(f"\n🔗 Logged in as {bot_name}")
         print(f"🌐 Serving {len(self.guilds)} servers")
 
-        # Only start Flask on Render
-        if os.environ.get('RENDER'):
+        # Only start Flask on Render or Replit
+        if os.environ.get("RENDER") or os.environ.get("REPL_ID"):
             import threading
-            flask_thread = threading.Thread(target=run_flask, daemon=True)
-            flask_thread.start()
+            threading.Thread(target=run_flask, daemon=True).start()
             print("🚀 Flask server started")
 
     async def close(self):
@@ -79,7 +76,7 @@ class Bot(commands.Bot):
             await self.session.close()
         await super().close()
 
-# Main async runner
+# Main bot runner
 async def main():
     bot = Bot()
     try:
@@ -91,9 +88,9 @@ async def main():
         traceback.print_exc()
         await bot.close()
 
-# Run bot
+# Entry point
 if __name__ == "__main__":
-    if os.environ.get('RENDER'):
+    if os.environ.get("RENDER") or os.environ.get("REPL_ID"):
         asyncio.run(main())
     else:
         bot = Bot()
