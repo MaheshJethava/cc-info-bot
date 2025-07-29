@@ -78,8 +78,9 @@ class Bot(commands.Bot):
         """Update bot presence periodically"""
         try:
             activity = discord.Activity(
-                type=discord.ActivityType.watching,
-                name=f"{len(self.guilds)} servers"
+                type=discord.ActivityType.Watching,
+                status=discord.Status.dnd,
+                name=f"{len(self.guilds)} Servers !!"
             )
             await self.change_presence(activity=activity)
         except Exception as e:
