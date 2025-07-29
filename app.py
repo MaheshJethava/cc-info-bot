@@ -34,16 +34,13 @@ class Bot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.message_content = True
+        super().__init__(command_prefix="!", intents=intents, help_command=None)
 
-        super().__init__(
-            command_prefix="!",
-            intents=intents,
-            help_command=None
-        )
         self.session = None
+        # ⚠️ Must be attached *after* super().__init__()!
+        self.update_status = tasks.loop(minutes=5)(self._update_status)
 
     async def setup_hook(self):
-        """Initialize bot components"""
         self.session = aiohttp.ClientSession()
         
         try:
@@ -52,9 +49,16 @@ class Bot(commands.Bot):
         except Exception as e:
             print(f"❌ Failed to load cog: {e}")
             traceback.print_exc()
-        
+
         await self.tree.sync()
         self.update_status.start()
+
+    async def _update_status(self):
+        try:
+            activity = discord.Game(name="Playing Clutch Info 📑")
+            await self.change_presence(activity=activity, status=discord.Status.dnd)
+        except Exception as e:
+            print(f"⚠️ Status update failed: {e}")
 
     async def on_ready(self):
         global bot_name
@@ -68,23 +72,11 @@ class Bot(commands.Bot):
             flask_thread.start()
             print("🚀 Flask server started in background")
 
-@tasks.loop(minutes=5)
-async def update_status(self):
-    """Update bot presence periodically"""
-    try:
-        activity = discord.Game(name="Playing Clutch Info 📑")
-        await self.change_presence(activity=activity, status=discord.Status.dnd)
-    except Exception as e:
-        print(f"⚠️ Status update failed: {e}")
-
-    @update_status.before_loop
-    async def before_status_update(self):
-        await self.wait_until_ready()
-
     async def close(self):
         if self.session:
             await self.session.close()
         await super().close()
+
 async def main():
     bot = Bot()
     try:
