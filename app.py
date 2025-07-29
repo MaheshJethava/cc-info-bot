@@ -8,27 +8,27 @@ import aiohttp
 import asyncio
 from dotenv import load_dotenv
 
-# Load .env variables
+# Load environment variables
 load_dotenv()
 
-# Flask app setup for uptime pings
+# Flask app for uptime pings (Render)
 app = Flask(__name__)
 bot_name = "Loading..."
 
-@app.route('/')
+@app.route("/")
 def home():
     return f"✅ Bot {bot_name} is operational"
 
 def run_flask():
     port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
 
-# Get bot token from environment
+# Token check
 TOKEN = os.getenv("TOKEN")
 if not TOKEN:
-    raise ValueError("❌ Missing TOKEN in environment")
+    raise ValueError("Missing TOKEN in environment")
 
-# Define custom bot class
+# Discord Bot
 class Bot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
@@ -36,15 +36,27 @@ class Bot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents, help_command=None)
 
         self.session = None
-        self.update_status = tasks.loop(minutes=5)(self._update_status)
+
+        # Define task here — AFTER method is defined
+        self.update_status = self._create_status_loop()
+
+    def _create_status_loop(self):
+        @tasks.loop(minutes=5)
+        async def loop():
+            try:
+                activity = discord.Game("Clutch Info 📑")
+                await self.change_presence(activity=activity)
+            except Exception as e:
+                print(f"⚠️ Failed to update status: {e}")
+        return loop
 
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
 
-        # Load extension
+        # Load cog(s)
         try:
             await self.load_extension("cogs.infoCommands")
-            print("✅ Successfully loaded InfoCommands cog")
+            print("✅ Loaded InfoCommands cog")
         except Exception as e:
             print(f"❌ Failed to load cog: {e}")
             traceback.print_exc()
@@ -52,35 +64,28 @@ class Bot(commands.Bot):
         await self.tree.sync()
         self.update_status.start()
 
-async def _update_status(self):
-    try:
+    async def on_ready(self):
+        global bot_name
+        bot_name = str(self.user)
+        print(f"\n🔗 Logged in as {bot_name}")
+        print(f"🌐 Serving {len(self.guilds)} servers")
+
+        # Set DND + activity (one-time)
         activity = discord.Game("Clutch Info 📑")
-        await self.change_presence(activity=activity)  # 👈 don't include status here
-    except Exception as e:
-        print(f"⚠️ Failed to update status: {e}")
+        await self.change_presence(status=discord.Status.dnd, activity=activity)
 
-async def on_ready(self):
-    global bot_name
-    bot_name = str(self.user)
-    print(f"\n🔗 Logged in as {bot_name}")
-    print(f"🌐 Serving {len(self.guilds)} servers")
-
-    # Explicitly set DND status again after ready
-    activity = discord.Game("Clutch Info 📑")
-    await self.change_presence(status=discord.Status.dnd, activity=activity)
-
-    # Start Flask server if on Render
-    if os.environ.get("RENDER") or os.environ.get("REPL_ID"):
-        import threading
-        threading.Thread(target=run_flask, daemon=True).start()
-        print("🚀 Flask server started")
+        # Start Flask server on Render
+        if os.environ.get("RENDER"):
+            import threading
+            threading.Thread(target=run_flask, daemon=True).start()
+            print("🚀 Flask server started")
 
     async def close(self):
         if self.session:
             await self.session.close()
         await super().close()
 
-# Main bot runner
+# Run bot
 async def main():
     bot = Bot()
     try:
@@ -92,9 +97,8 @@ async def main():
         traceback.print_exc()
         await bot.close()
 
-# Entry point
 if __name__ == "__main__":
-    if os.environ.get("RENDER") or os.environ.get("REPL_ID"):
+    if os.environ.get("RENDER"):
         asyncio.run(main())
     else:
         bot = Bot()
