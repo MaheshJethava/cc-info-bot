@@ -32,10 +32,9 @@ if not TOKEN:
 
 class Bot(commands.Bot):
     def __init__(self):
-        # Configure minimal required intents
         intents = discord.Intents.default()
         intents.message_content = True
-        
+
         super().__init__(
             command_prefix="!",
             intents=intents,
@@ -47,7 +46,6 @@ class Bot(commands.Bot):
         """Initialize bot components"""
         self.session = aiohttp.ClientSession()
         
-        # Load cogs
         try:
             await self.load_extension("cogs.infoCommands")
             print("✅ Successfully loaded InfoCommands cog")
@@ -59,14 +57,11 @@ class Bot(commands.Bot):
         self.update_status.start()
 
     async def on_ready(self):
-        """When bot connects to Discord"""
         global bot_name
         bot_name = str(self.user)
-        
         print(f"\n🔗 Connected as {bot_name}")
         print(f"🌐 Serving {len(self.guilds)} servers")
-        
-        # Start Flask if running on Render
+
         if os.environ.get('RENDER'):
             import threading
             flask_thread = threading.Thread(target=run_flask, daemon=True)
@@ -77,12 +72,8 @@ class Bot(commands.Bot):
     async def update_status(self):
         """Update bot presence periodically"""
         try:
-            activity = discord.Activity(
-                type=discord.ActivityType.Watching,
-                status=discord.Status.dnd,
-                name=f"{len(self.guilds)} Servers !!"
-            )
-             await self.change_presence(activity=activity, status=discord.Status.dnd)
+            activity = discord.Game(name=f"Watching {len(self.guilds)} Servers !!")
+            await self.change_presence(activity=activity, status=discord.Status.dnd)
         except Exception as e:
             print(f"⚠️ Status update failed: {e}")
 
@@ -91,11 +82,9 @@ class Bot(commands.Bot):
         await self.wait_until_ready()
 
     async def close(self):
-        """Cleanup on shutdown"""
         if self.session:
             await self.session.close()
         await super().close()
-
 async def main():
     bot = Bot()
     try:
