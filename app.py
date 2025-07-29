@@ -73,7 +73,7 @@ class Bot(commands.Bot):
             flask_thread.start()
             print("🚀 Flask server started in background")
 
-   @tasks.loop(minutes=5)
+    @tasks.loop(minutes=5)
     async def update_status(self):
         """Update bot presence periodically"""
         try:
