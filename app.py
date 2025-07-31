@@ -38,16 +38,16 @@ class Bot(commands.Bot):
         self.session = None
 
         # Define task here — AFTER method is defined
-       # self.update_status = self._create_status_loop()
+        self.update_status = self._create_status_loop()
 
     def _create_status_loop(self):
         @tasks.loop(minutes=5)
         async def loop():
-            try:
-                activity = discord.Game("Clutch Info 📑")
-                await self.change_presence(activity=activity)
-            except Exception as e:
-                print(f"⚠️ Failed to update status: {e}")
+             try:
+                  activity = discord.Game("Clutch Info 📑")
+                  await self.change_presence(status=discord.Status.dnd, activity=activity)
+               except Exception as e:
+                   print(f"⚠️ Failed to update status: {e}")        
         return loop
 
     async def setup_hook(self):
@@ -61,8 +61,8 @@ class Bot(commands.Bot):
             print(f"❌ Failed to load cog: {e}")
             traceback.print_exc()
 
-      #  await self.tree.sync()
-       # self.update_status.start()
+        await self.tree.sync()
+        self.update_status.start()
 
     async def on_ready(self):
         global bot_name
