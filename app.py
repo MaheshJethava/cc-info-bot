@@ -40,15 +40,15 @@ class Bot(commands.Bot):
         # Define task here — AFTER method is defined
         self.update_status = self._create_status_loop()
 
-    def _create_status_loop(self):
-        @tasks.loop(minutes=5)
-        async def loop():
-             try:
-                  activity = discord.Game("Clutch Info 📑")
-                  await self.change_presence(status=discord.Status.dnd, activity=activity)
-               except Exception as e:
-                   print(f"⚠️ Failed to update status: {e}")        
-        return loop
+def _create_status_loop(self):
+    @tasks.loop(minutes=5)
+    async def loop():
+        try:
+            activity = discord.Game("Clutch Info 📑")
+            await self.change_presence(status=discord.Status.dnd, activity=activity)
+        except Exception as e:
+            print(f"⚠️ Failed to update status: {e}")
+    return loop
 
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
