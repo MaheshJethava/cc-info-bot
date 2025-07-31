@@ -36,31 +36,26 @@ class Bot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents, help_command=None)
 
         self.session = None
-
-        # Define task here — AFTER method is defined
         self.update_status = self._create_status_loop()
 
-def _create_status_loop(self):
-    @tasks.loop(minutes=5)
-    async def loop():
-        try:
-            activity = discord.Game("Clutch Info 📑")
-            await self.change_presence(status=discord.Status.dnd, activity=activity)
-        except Exception as e:
-            print(f"⚠️ Failed to update status: {e}")
-    return loop
+    def _create_status_loop(self):  # ✅ Inside the class now
+        @tasks.loop(minutes=5)
+        async def loop():
+            try:
+                activity = discord.Game("Clutch Info 📑")
+                await self.change_presence(status=discord.Status.dnd, activity=activity)
+            except Exception as e:
+                print(f"⚠️ Failed to update status: {e}")
+        return loop
 
     async def setup_hook(self):
         self.session = aiohttp.ClientSession()
-
-        # Load cog(s)
         try:
             await self.load_extension("cogs.infoCommands")
             print("✅ Loaded InfoCommands cog")
         except Exception as e:
             print(f"❌ Failed to load cog: {e}")
             traceback.print_exc()
-
         await self.tree.sync()
         self.update_status.start()
 
@@ -69,12 +64,9 @@ def _create_status_loop(self):
         bot_name = str(self.user)
         print(f"\n🔗 Logged in as {bot_name}")
         print(f"🌐 Serving {len(self.guilds)} servers")
-
-        # Set DND + activity (one-time)
         activity = discord.Game("Clutch Info 📑")
         await self.change_presence(status=discord.Status.dnd, activity=activity)
 
-        # Start Flask server on Render
         if os.environ.get("RENDER"):
             import threading
             threading.Thread(target=run_flask, daemon=True).start()
