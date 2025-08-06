@@ -168,7 +168,7 @@ class InfoCommands(commands.Cog):
 
         try:
             async with ctx.typing():
-                async with self.session.get(f"{self.api_url}?uid={uid}") as response:
+                async with self.session.get(self.api_url.format(uid=uid)) as response:   #async with self.session.get(f"{self.api_url}?uid={uid}") as response:
                     if response.status == 404:
                         return await ctx.send(f" Player with UID `{uid}` not found.")
                     if response.status != 200:
