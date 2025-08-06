@@ -10,6 +10,7 @@ import io
 import uuid
 import gc
 from datetime import datetime
+from urllib.parse import quote_plus
 
 CONFIG_FILE = "info_channels.json"
 
@@ -262,7 +263,9 @@ class InfoCommands(commands.Cog):
 
             if region and uid:
                 try:
-                    image_url = f"{self.generate_url}{uid}" # image_url = f"{self.generate_url}?uid={uid}"
+                    raw_uid_param = f"uid+={uid}"
+                    encoded_param = quote_plus(raw_uid_param)
+                    image_url = f"https://generatethug.onrender.com/profile?{encoded_param}" # image_url = f"{self.generate_url}?uid={uid}"
                     print(f"Url d'image = {image_url}")
                     if image_url:
                         async with self.session.get(image_url) as img_file:
