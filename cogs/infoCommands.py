@@ -263,7 +263,7 @@ class InfoCommands(commands.Cog):
 
             if region and uid:
                 try:
-                image_url = f"{self.generate_url}{uid}"     #   raw_uid_param = f"uid+={uid}"                     encoded_param = quote_plus(raw_uid_param)                     image_url = f"https://generatethug.onrender.com/profile?{encoded_param}" 
+                    image_url = f"{self.generate_url}{uid}"     #   raw_uid_param = f"uid+={uid}"                     encoded_param = quote_plus(raw_uid_param)                     image_url = f"https://generatethug.onrender.com/profile?{encoded_param}" 
                     print(f"Url d'image = {image_url}")
                     if image_url:
                         async with self.session.get(image_url) as img_file:
