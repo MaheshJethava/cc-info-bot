@@ -261,36 +261,23 @@ class InfoCommands(commands.Cog):
             embed.set_footer(text="CLUTCH CORPORATION")
             await ctx.send(embed=embed)
 
-            # if region and uid:
-            #     try:
-            #     image_url = f"{self.generate_url}{uid}"     #   raw_uid_param = f"uid+={uid}"                     encoded_param = quote_plus(raw_uid_param)                     image_url = f"https://generatethug.onrender.com/profile?{encoded_param}" 
-            #         print(f"Url d'image = {image_url}")
-            #         if image_url:
-            #             async with self.session.get(image_url) as img_file:
-            #                 if img_file.status == 200:
-            #                     with io.BytesIO(await img_file.read()) as buf:
-            #                         file = discord.File(buf, filename=f"outfit_{uuid.uuid4().hex[:8]}.png")
-            #                         await ctx.send(file=file)  # ✅ ENVOYER L'IMAGE
-            #                         print("Image envoyée avec succès")
-            #                 else:
-            #                     print(f"Erreur HTTP: {img_file.status}")
-            #     except Exception as e:
-            #         print("Image generation failed:", e)
-
             if region and uid:
-                 try:
-                 image_url = f"https://generatethug.onrender.com/profile?uid={quote_plus(uid)}"
-                    print(f"Image URL = {image_url}")
-                       async with self.session.get(image_url) as img_file:
-                         if img_file.status == 200:
-                             with io.BytesIO(await img_file.read()) as buf:
-                              file = discord.File(buf, filename=f"outfit_{uuid.uuid4().hex[:8]}.png")
-                                  await ctx.send(file=file)
-                                  print("✅ Image sent successfully")
-                         else:
-                              print(f"❌ Image HTTP error: {img_file.status}")
-               except Exception as e:
-                   print("❌ Image generation failed:", e)
+                try:
+                image_url = f"{self.generate_url}{uid}"     #   raw_uid_param = f"uid+={uid}"                     encoded_param = quote_plus(raw_uid_param)                     image_url = f"https://generatethug.onrender.com/profile?{encoded_param}" 
+                    print(f"Url d'image = {image_url}")
+                    if image_url:
+                        async with self.session.get(image_url) as img_file:
+                            if img_file.status == 200:
+                                with io.BytesIO(await img_file.read()) as buf:
+                                    file = discord.File(buf, filename=f"outfit_{uuid.uuid4().hex[:8]}.png")
+                                    await ctx.send(file=file)  # ✅ ENVOYER L'IMAGE
+                                    print("Image envoyée avec succès")
+                            else:
+                                print(f"Erreur HTTP: {img_file.status}")
+                except Exception as e:
+                    print("Image generation failed:", e)
+
+
 
         except Exception as e:
             await ctx.send(f" Unexpected error: `{e}`")
