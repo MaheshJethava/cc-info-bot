@@ -97,9 +97,9 @@ class InfoCommands(commands.Cog):
         if str(channel.id) not in self.config_data["servers"][guild_id]["info_channels"]:
             self.config_data["servers"][guild_id]["info_channels"].append(str(channel.id))
             self.save_config()
-            await ctx.send(f"✅ {channel.mention} is now allowed for `!info` commands")
+            await ctx.send(f"✅ {channel.mention} is now allowed for !info commands")
         else:
-            await ctx.send(f"ℹ️ {channel.mention} is already allowed for `!info` commands")
+            await ctx.send(f"ℹ️ {channel.mention} is already allowed for !info commands")
 
     @commands.hybrid_command(name="removeinfochannel", description="Remove a channel from !info commands")
     @commands.has_permissions(administrator=True)
@@ -171,7 +171,7 @@ class InfoCommands(commands.Cog):
             async with ctx.typing():
                 async with self.session.get(self.api_url.format(uid=uid)) as response:   #async with self.session.get(f"{self.api_url}?uid={uid}") as response:
                     if response.status == 404:
-                        return await ctx.send(f" Player with UID `{uid}` not found.")
+                        return await ctx.send(f" Player with UID {uid} not found.")
                     if response.status != 200:
                         return await ctx.send("API error. Try again later.")
                     data = await response.json()
@@ -198,7 +198,7 @@ class InfoCommands(commands.Cog):
             embed.add_field(name="", value="\n".join([
                 "**┌  ACCOUNT BASIC INFO**",
                 f"**├─ Name**: {basic_info.get('nickname', 'Not found')}",
-                f"**├─ UID**: `{uid}`",
+                f"**├─ UID**: {uid}",
                 f"**├─ Level**: {basic_info.get('level', 'Not found')} (Exp: {basic_info.get('exp', '?')})",
                 f"**├─ Region**: {region}",
                 f"**├─ Likes**: {basic_info.get('liked', 'Not found')}",
@@ -238,7 +238,7 @@ class InfoCommands(commands.Cog):
                 guild_info = [
                     "**┌  GUILD INFO**",
                     f"**├─ Guild Name**: {clan_info.get('clanName', 'Not found')}",
-                    f"**├─ Guild ID**: `{clan_info.get('clanId', 'Not found')}`",
+                    f"**├─ Guild ID**: {clan_info.get('clanId', 'Not found')}",
                     f"**├─ Guild Level**: {clan_info.get('clanLevel', 'Not found')}",
                     f"**├─ Live Members**: {clan_info.get('memberNum', 'Not found')}/{clan_info.get('capacity', '?')}"
                 ]
@@ -246,7 +246,7 @@ class InfoCommands(commands.Cog):
                     guild_info.extend([
                         "**└─ Leader Info**:",
                         f"    **├─ Leader Name**: {captain_info.get('nickname', 'Not found')}",
-                        f"    **├─ Leader UID**: `{captain_info.get('accountId', 'Not found')}`",
+                        f"    **├─ Leader UID**: {captain_info.get('accountId', 'Not found')}",
                         f"    **├─ Leader Level**: {captain_info.get('level', 'Not found')} (Exp: {captain_info.get('exp', '?')})",
                         f"    **├─ Last Login**: {self.convert_unix_timestamp(int(captain_info.get('lastLoginAt', 'Not found')))}",
                         f"    **├─ Title**: {captain_info.get('title', 'Not found')}",
@@ -277,14 +277,12 @@ class InfoCommands(commands.Cog):
                 except Exception as e:
                     print("Image generation failed:", e)
 
-
-
         except Exception as e:
-            await ctx.send(f" Unexpected error: `{e}`")
-
-        
+            await ctx.send(f" Unexpected error: {e}")
         finally:
             gc.collect()
+
+
     async def cog_unload(self):
         await self.session.close()
 
@@ -292,7 +290,7 @@ class InfoCommands(commands.Cog):
         embed = discord.Embed(
             title="❌ Player Not Found",
             description=(
-                f"UID `{uid}` not found or inaccessible.\n\n"
+                f"UID {uid} not found or inaccessible.\n\n"
                 "⚠️ **Note:** IND servers are currently not working."
             ),
             color=0xE74C3C
